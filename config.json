@@ -1,0 +1,7 @@
+{
+	"host": ":3333",
+	"datadir": "./data",
+	"routes": [
+		"events"
+	]
+}
