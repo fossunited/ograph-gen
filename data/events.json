@@ -13,5 +13,15 @@
         "name": "event_date",
         "value":"EVENT_DATE_REPLACE",
         "description": "date on which event is happening"
+    },
+	{
+        "name": "event_chapter",
+        "value":"EVENT_CHAPTER_REPLACE",
+        "description": "event the chapter is under"
+    },
+	{
+        "name": "event_location",
+        "value":"EVENT_LOCATION_REPLACE",
+        "description": "location of event"
     }
 ]

@@ -1,0 +1,37 @@
+[
+	{
+        "name": "event_name",
+        "value":"EVENT_NAME_REPLACE",
+        "description": "name of the event"
+    },
+	{
+        "name": "event_chapter",
+        "value":"CHAPTER_NAME_REPLACE",
+        "description": "chapter name"
+    },
+	{
+        "name": "session_type",
+        "value":"SESSION_TYPE_REPLACE",
+        "description": "type of session (lightning talk, workshop etc.)"
+    },
+	{
+        "name": "speaker_name",
+        "value":"SPEAKER_NAME_REPLACE",
+        "description": "speaker's name"
+    },
+	{
+        "name": "speaker_designation",
+        "value":"SPEAKER_DESIGNATION_REPLACE",
+        "description": "speaker designation"
+    },
+	{
+        "name": "speaker_image",
+        "value":"SPEAKER_IMAGE_REPLACE",
+        "description": "speaker image"
+    },
+	{
+        "name": "talk_title",
+        "value":"TALK_TITLE_REPLACE",
+        "description": "location of event"
+    }
+]
