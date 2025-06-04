@@ -17,8 +17,9 @@ type GenResource struct {
 
 func (rs GenResource) Routes() chi.Router {
 	r := chi.NewRouter()
-	for _, route := range *rs.RoutesConfig {
-		r.Get("/"+route.Name, func(w http.ResponseWriter, r *http.Request) {
+	for i, _ := range *rs.RoutesConfig {
+		conf := (*rs.RoutesConfig)[i]
+		r.Get("/"+conf.Name, func(w http.ResponseWriter, r *http.Request) {
 			params := make(map[string]string)
 			bind := chix.NewBind(r)
 			defer bind.Release()
@@ -28,8 +29,8 @@ func (rs GenResource) Routes() chi.Router {
 				return
 			}
 
-			svgStr := string(route.SVG)
-			for _, val := range route.Replacements {
+			svgStr := string(conf.SVG)
+			for _, val := range conf.Replacements {
 				svgStr = strings.ReplaceAll(svgStr, val.ReplacementValue, params[val.ReplacementName])
 			}
 
