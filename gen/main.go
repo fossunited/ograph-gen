@@ -2,12 +2,13 @@ package gen
 
 import (
 	"net/http"
-	"strings"
+	"bytes"
 
 	"github.com/fossunited/ograph-gen/utils"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-rat/chix"
 	"github.com/mskrha/svg2png"
+	"text/template"
 )
 
 type GenResource struct {
@@ -30,11 +31,22 @@ func (rs GenResource) Routes() chi.Router {
 			}
 
 			svgStr := string(conf.SVG)
-			for _, val := range conf.Replacements {
-				svgStr = strings.ReplaceAll(svgStr, val.ReplacementValue, params[val.ReplacementName])
+			tmpl, err := template.New("svg").Parse(svgStr)
+			if err != nil {
+				w.WriteHeader(500)
+				w.Write([]byte("Unable to parse SVG: " + err.Error()))
+				return
+			}
+			
+			svgBuf := bytes.NewBuffer([]byte(""))
+			err = tmpl.Execute(svgBuf, params)
+			if err != nil {
+				w.WriteHeader(500)
+				w.Write([]byte("Unable to parse SVG: " + err.Error()))
+				return
 			}
 
-			png, err := rs.SVGConverter.Convert([]byte(svgStr))
+			png, err := rs.SVGConverter.Convert(svgBuf.Bytes())
 			if err != nil {
 				w.WriteHeader(500)
 				w.Write([]byte("Could not convert svg to png: " + err.Error()))

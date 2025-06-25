@@ -9,14 +9,7 @@ import (
 
 type RouteConfig struct {
 	Name         string        `json:"name"`
-	Replacements []Replacement `json:"replacements"`
 	SVG          []byte        `json:"svg"`
-}
-
-type Replacement struct {
-	ReplacementName        string `json:"name"`
-	ReplacementValue       string `json:"value"`
-	ReplacementDescription string `json:"description"`
 }
 
 type Config struct {
@@ -50,15 +43,7 @@ func LoadRoutes(conf Config) ([]RouteConfig, error) {
 	var routes []RouteConfig
 	for _, route := range conf.Routes {
 		var routeConf RouteConfig
-		routeByte, err := os.ReadFile(conf.DataDir + "/" + route + ".json") // Read the route's svg
-		if err != nil {
-			return []RouteConfig{}, err
-		}
-
-		err = json.Unmarshal(routeByte, &routeConf.Replacements)
-		if err != nil {
-			return []RouteConfig{}, err
-		}
+		var err error
 
 		routeConf.Name = route
 		routeConf.SVG, err = os.ReadFile(conf.DataDir + "/" + route + ".svg") // Read the route's svg
