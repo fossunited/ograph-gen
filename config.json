@@ -3,6 +3,12 @@
 	"datadir": "./data",
 	"routes": [
 		"events",
-		"submission"
+		"submission",
+		"cfp",
+		"proposals",
+		"schedule",
+		"rsvp",
+		"profile",
+		"events_new"
 	]
 }
