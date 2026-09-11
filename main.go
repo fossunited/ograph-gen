@@ -9,8 +9,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/docgen"
-	"github.com/mskrha/svg2png"
 
+	"github.com/fossunited/ograph-gen/convert"
 	"github.com/fossunited/ograph-gen/gen"
 	"github.com/fossunited/ograph-gen/utils"
 )
@@ -34,10 +34,8 @@ func main() {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Heartbeat("/ping"))
 
-	converter := svg2png.New()
-	if conf.Inkscape != "" {
-		converter.SetBinary(conf.Inkscape)
-	} else if path, err := exec.LookPath("inkscape"); err == nil {
+	converter := convert.New()
+	if path, err := exec.LookPath("rsvg-convert"); err == nil {
 		converter.SetBinary(path)
 	}
 

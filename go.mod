@@ -9,6 +9,5 @@ require github.com/gofiber/schema v1.3.0 // indirect
 require (
 	github.com/go-chi/docgen v1.3.0
 	github.com/go-rat/chix v1.2.0
-	github.com/mskrha/svg2png v0.0.0-20240706085601-64fa78f4eb07
 	golang.org/x/image v0.46.0
 )
