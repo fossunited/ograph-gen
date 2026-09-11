@@ -4,16 +4,17 @@ import (
 	"net/http"
 	"bytes"
 
+	"github.com/fossunited/ograph-gen/convert"
+	"github.com/fossunited/ograph-gen/images"
 	"github.com/fossunited/ograph-gen/utils"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-rat/chix"
-	"github.com/mskrha/svg2png"
 	"text/template"
 )
 
 type GenResource struct {
 	RoutesConfig *[]utils.RouteConfig
-	SVGConverter *svg2png.Converter
+	SVGConverter *convert.Converter
 }
 
 func (rs GenResource) Routes() chi.Router {
@@ -30,8 +31,10 @@ func (rs GenResource) Routes() chi.Router {
 				return
 			}
 
+			images.ProcessImageParams(params)
+
 			svgStr := string(conf.SVG)
-			tmpl, err := template.New("svg").Parse(svgStr)
+			tmpl, err := template.New("svg").Option("missingkey=zero").Parse(svgStr)
 			if err != nil {
 				w.WriteHeader(500)
 				w.Write([]byte("Unable to parse SVG: " + err.Error()))

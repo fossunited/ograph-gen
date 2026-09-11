@@ -109,7 +109,7 @@
 <path d="M1147.04 55.5652H1078.75V108.248H1147.04V55.5652Z" stroke="#1A1A1A" stroke-width="2.76922"/>
 <text fill="#1A1A1A" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="48" font-weight="bold" letter-spacing="-0.02em"><tspan x="51" y="158.955">{{ .talk_title }}&#10;</tspan><tspan x="51" y="225.955">{{ .session_type }}</tspan></text>
 <path d="M51 270H964" stroke="#08B74F" stroke-width="2"/>
-<image x="51" y="298" id="image0_56_20848" width="100" height="100" href="https://fossunited.org{{ .image }}"/>
+<image x="51" y="298" id="image0_56_20848" width="100" height="100" href="{{ .speaker_image }}"/>
 <text fill="#1A1A1A" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="36" font-weight="bold" letter-spacing="-0.02em"><tspan x="167" y="358.091">{{ .speaker_name }}</tspan></text>
 <text fill="#929292" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="24" font-weight="600" letter-spacing="-0.02em"><tspan x="167" y="393.727">{{ .speaker_designation }}</tspan></text>
 </g>

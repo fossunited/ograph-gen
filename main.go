@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os/exec"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/docgen"
-	"github.com/mskrha/svg2png"
 
+	"github.com/fossunited/ograph-gen/convert"
 	"github.com/fossunited/ograph-gen/gen"
 	"github.com/fossunited/ograph-gen/utils"
 )
@@ -33,8 +34,12 @@ func main() {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Heartbeat("/ping"))
 
-	// Every sub-route has access to so it can do whatever the fuck it needs to
-	r.Mount("/gen", gen.GenResource{RoutesConfig: &routes, SVGConverter: svg2png.New()}.Routes())
+	converter := convert.New()
+	if path, err := exec.LookPath("rsvg-convert"); err == nil {
+		converter.SetBinary(path)
+	}
+
+	r.Mount("/gen", gen.GenResource{RoutesConfig: &routes, SVGConverter: converter}.Routes())
 
 	// Generate docs using docgen
 	// TODO: MAKE THIS INTO A SEPARATE FILE OR SERVE IT
