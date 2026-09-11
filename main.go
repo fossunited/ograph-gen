@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os/exec"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -33,8 +34,14 @@ func main() {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Heartbeat("/ping"))
 
-	// Every sub-route has access to so it can do whatever the fuck it needs to
-	r.Mount("/gen", gen.GenResource{RoutesConfig: &routes, SVGConverter: svg2png.New()}.Routes())
+	converter := svg2png.New()
+	if conf.Inkscape != "" {
+		converter.SetBinary(conf.Inkscape)
+	} else if path, err := exec.LookPath("inkscape"); err == nil {
+		converter.SetBinary(path)
+	}
+
+	r.Mount("/gen", gen.GenResource{RoutesConfig: &routes, SVGConverter: converter}.Routes())
 
 	// Generate docs using docgen
 	// TODO: MAKE THIS INTO A SEPARATE FILE OR SERVE IT

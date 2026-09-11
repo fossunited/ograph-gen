@@ -13,9 +13,10 @@ type RouteConfig struct {
 }
 
 type Config struct {
-	Host    string   `json:"host"`
-	DataDir string   `json:"datadir"`
-	Routes  []string `json:"routes"`
+	Host     string   `json:"host"`
+	DataDir  string   `json:"datadir"`
+	Routes   []string `json:"routes"`
+	Inkscape string   `json:"inkscape"`
 }
 
 func ConfigDecode() (Config, error) {

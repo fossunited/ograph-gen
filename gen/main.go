@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"bytes"
 
+	"github.com/fossunited/ograph-gen/images"
 	"github.com/fossunited/ograph-gen/utils"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-rat/chix"
@@ -29,6 +30,8 @@ func (rs GenResource) Routes() chi.Router {
 				w.Write([]byte("Could not parse query strings: " + err.Error()))
 				return
 			}
+
+			images.ProcessImageParams(params)
 
 			svgStr := string(conf.SVG)
 			tmpl, err := template.New("svg").Parse(svgStr)
