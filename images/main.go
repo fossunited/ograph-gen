@@ -11,6 +11,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -21,9 +22,9 @@ import (
 var assets embed.FS
 
 const (
-	baseURL        = "https://fossunited.org"
-	fetchTimeout   = 10 * time.Second
-	maxImageBytes  = 10 << 20 // 10MB
+	baseURL       = "https://fossunited.org"
+	fetchTimeout  = 5 * time.Second
+	maxImageBytes = 5 << 20 // 5MB
 )
 
 var defaultAvatarDataURI string
@@ -45,34 +46,53 @@ func isInvalidPath(path string) bool {
 	return p == "" || strings.EqualFold(p, "none")
 }
 
-// FetchAndEncode downloads an image from fossunited.org at the given
-// relative path, converts it to PNG, and returns a base64 data URI.
+// resolveURL turns a param value into the fossunited.org URL to fetch. A
+// relative path is appended to baseURL (the historical behavior); an
+// absolute URL is used as-is only if it already points at fossunited.org,
+// so this never fetches an arbitrary caller-supplied host.
+func resolveURL(path string) (string, error) {
+	u, err := url.Parse(path)
+	if err == nil && u.IsAbs() {
+		if u.Scheme != "http" && u.Scheme != "https" || !strings.EqualFold(u.Hostname(), "fossunited.org") {
+			return "", fmt.Errorf("only fossunited.org URLs are allowed, got %q", path)
+		}
+		return path, nil
+	}
+	return baseURL + "/" + strings.TrimPrefix(path, "/"), nil
+}
+
+// FetchAndEncode downloads an image from fossunited.org at the given path
+// (or a full fossunited.org URL), converts it to PNG, and returns a
+// base64 data URI.
 func FetchAndEncode(path string) (string, error) {
 	if isInvalidPath(path) {
 		return DefaultAvatar(), nil
 	}
 
-	url := baseURL + path
+	target, err := resolveURL(path)
+	if err != nil {
+		return "", err
+	}
 
 	client := &http.Client{Timeout: fetchTimeout}
-	resp, err := client.Get(url)
+	resp, err := client.Get(target)
 	if err != nil {
-		return "", fmt.Errorf("fetch %s: %w", url, err)
+		return "", fmt.Errorf("fetch %s: %w", target, err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("fetch %s: status %d", url, resp.StatusCode)
+		return "", fmt.Errorf("fetch %s: status %d", target, resp.StatusCode)
 	}
 
 	body, err := io.ReadAll(io.LimitReader(resp.Body, maxImageBytes))
 	if err != nil {
-		return "", fmt.Errorf("read %s: %w", url, err)
+		return "", fmt.Errorf("read %s: %w", target, err)
 	}
 
 	pngData, err := toPNG(body, resp.Header.Get("Content-Type"), path)
 	if err != nil {
-		return "", fmt.Errorf("convert %s: %w", url, err)
+		return "", fmt.Errorf("convert %s: %w", target, err)
 	}
 
 	return "data:image/png;base64," + base64.StdEncoding.EncodeToString(pngData), nil
