@@ -43,6 +43,34 @@ go build -o ograph-gen .
 
 Server starts on `:3333` by default (configurable in `config.json`).
 
+### Using `just`
+
+A [`justfile`](justfile) wraps the common commands:
+
+```sh
+just build       # go build (local Go toolchain + rsvg-convert on PATH)
+just run         # build and run locally
+just build-nix   # build via Nix magic (default.nix)
+just run-nix     # build via Nix and run straight from the store
+just test <route> key=value ...   # hit /gen/<route>, save the PNG to /tmp, open it
+just clean       # remove local build artifacts
+```
+
+`just test` reuses an already-running server on `:3333` if there is one, otherwise it builds and starts one just for that call. Example:
+
+```sh
+just test submission talk_title=Building+FOSS speaker_name=Jane speaker_image=/files/photo.webp event_chapter=INDIAFOSS event_name=IndiaFOSS+2026
+```
+
+### Building with Nix
+
+`default.nix` builds the binary with `buildGoModule` and wraps it so `rsvg-convert` (from nixpkgs' `librsvg`) is always on `PATH`, with no system package install needed:
+
+```sh
+nix-build
+./result/bin/ograph-gen
+```
+
 ## Configuration
 
 `config.json`:
@@ -80,6 +108,30 @@ Parameters ending in `_image` are fetched from `fossunited.org`, converted to PN
 ```
 http://localhost:3333/gen/submission?talk_title=Building+FOSS&speaker_name=Jane&speaker_image=/files/photo.webp&event_chapter=INDIAFOSS&event_name=IndiaFOSS+2026
 ```
+
+## Running as a systemd service
+
+A unit file is provided at `ograph-gen.service`. It expects the binary, `config.json`, and `data/` to live in `/opt/ograph-gen` and to run as a dedicated `ograph-gen` user.
+
+```sh
+sudo mkdir -p /opt/ograph-gen
+sudo cp ograph-gen config.json ograph-gen.service /opt/ograph-gen/
+sudo cp -r data /opt/ograph-gen/
+sudo chown -R ograph-gen:ograph-gen /opt/ograph-gen
+
+sudo cp /opt/ograph-gen/ograph-gen.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now ograph-gen
+```
+
+Check status and logs:
+
+```sh
+systemctl status ograph-gen
+journalctl -u ograph-gen -f
+```
+
+If you install to a different path, or run as a different user, edit `WorkingDirectory`, `ExecStart`, `User`, and `Group` in `ograph-gen.service` accordingly.
 
 ## Adding a new template
 
