@@ -4,8 +4,9 @@ default:
     @just --list
 
 # Build with the local Go toolchain (requires go + rsvg-convert on PATH; see README).
+# Targets linux/amd64 (deploy target server), which also covers this dev machine.
 build:
-    CGO_ENABLED=0 go build -o ograph-gen .
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ograph-gen .
 
 # Build with Nix (pins Go and vendors deps, wraps rsvg-convert in automatically).
 build-nix:
