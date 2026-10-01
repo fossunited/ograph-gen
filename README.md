@@ -4,6 +4,7 @@ Open Graph image generator for [fossunited.org](https://fossunited.org). Takes q
 
 ## Dependencies
 
+
 - **Go** 1.22+
 - **librsvg** (`rsvg-convert`) for SVG-to-PNG conversion
 - **Fonts**: Inter, FFF Forward
