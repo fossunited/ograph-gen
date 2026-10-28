@@ -424,6 +424,7 @@
 </g>{{ $slot = addf $slot 1 }}{{ end }}
 {{ if ne .fosshack_role "" }}{{ $cx := addf $start (mulf $slot $P) }}{{ if eq .fosshack_role "winner" }}<image x="{{ subf $cx 42 }}" y="273" width="84" height="84" href="{{ .badge_fosshack_winner }}"/>{{ end }}{{ if eq .fosshack_role "judge" }}<image x="{{ subf $cx 42 }}" y="273" width="84" height="84" href="{{ .badge_fosshack_judge }}"/>{{ end }}{{ if eq .fosshack_role "participant" }}<image x="{{ subf $cx 42 }}" y="273" width="84" height="84" href="{{ .badge_fosshack_participant }}"/>{{ end }}{{ if eq .fosshack_role "localhost" }}<image x="{{ subf $cx 42 }}" y="273" width="84" height="84" href="{{ .badge_fosshack_localhost }}"/>{{ end }}{{ $slot = addf $slot 1 }}{{ end }}
 {{ if eq .is_forklore "true" }}{{ $cx := addf $start (mulf $slot $P) }}<image x="{{ subf $cx 50 }}" y="276" width="100" height="83" href="{{ .badge_forklore }}"/>{{ $slot = addf $slot 1 }}{{ end }}
+{{ if ne .subtitle "" }}<text x="{{ $anchor }}" y="384" text-anchor="middle" font-family="Inter" font-size="20" font-weight="500" letter-spacing="-0.02em" fill="#929292">{{ .subtitle }}</text>{{ end }}
 </g>
 </g>
 <defs>
