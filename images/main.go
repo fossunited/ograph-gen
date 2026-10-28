@@ -18,7 +18,7 @@ import (
 	"golang.org/x/image/webp"
 )
 
-//go:embed assets/default_avatar.png
+//go:embed assets/default_avatar.png assets/badges/*.svg
 var assets embed.FS
 
 const (
@@ -29,16 +29,45 @@ const (
 
 var defaultAvatarDataURI string
 
+// badgeAssets maps a template param name (e.g. "badge_fosshack_winner",
+// "badge_forklore") to the base64 data URI of the embedded badge sticker.
+// Populated from assets/badges/*.svg at startup.
+var badgeAssets = map[string]string{}
+
 func init() {
 	data, err := assets.ReadFile("assets/default_avatar.png")
 	if err != nil {
 		log.Fatal("failed to load embedded default avatar: " + err.Error())
 	}
 	defaultAvatarDataURI = "data:image/png;base64," + base64.StdEncoding.EncodeToString(data)
+
+	entries, err := assets.ReadDir("assets/badges")
+	if err != nil {
+		log.Fatal("failed to list embedded badges: " + err.Error())
+	}
+	for _, entry := range entries {
+		svg, err := assets.ReadFile("assets/badges/" + entry.Name())
+		if err != nil {
+			log.Fatal("failed to load embedded badge " + entry.Name() + ": " + err.Error())
+		}
+		// "fosshack-winner.svg" -> "badge_fosshack_winner"
+		name := strings.TrimSuffix(entry.Name(), ".svg")
+		key := "badge_" + strings.ReplaceAll(name, "-", "_")
+		badgeAssets[key] = "data:image/svg+xml;base64," + base64.StdEncoding.EncodeToString(svg)
+	}
 }
 
 func DefaultAvatar() string {
 	return defaultAvatarDataURI
+}
+
+// InjectBadgeAssets adds the embedded badge sticker data URIs to the params
+// map (as badge_* keys) so templates can reference them. Keys unused by a
+// given template are harmless.
+func InjectBadgeAssets(params map[string]string) {
+	for key, uri := range badgeAssets {
+		params[key] = uri
+	}
 }
 
 func isInvalidPath(path string) bool {
