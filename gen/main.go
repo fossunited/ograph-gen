@@ -1,8 +1,8 @@
 package gen
 
 import (
-	"net/http"
 	"bytes"
+	"net/http"
 
 	"github.com/fossunited/ograph-gen/convert"
 	"github.com/fossunited/ograph-gen/images"
@@ -15,6 +15,14 @@ import (
 type GenResource struct {
 	RoutesConfig *[]utils.RouteConfig
 	SVGConverter *convert.Converter
+}
+
+// templateFuncs provides the float arithmetic the profile badge band uses to
+// center a variable number of badges in a row.
+var templateFuncs = template.FuncMap{
+	"addf": func(a, b float64) float64 { return a + b },
+	"subf": func(a, b float64) float64 { return a - b },
+	"mulf": func(a, b float64) float64 { return a * b },
 }
 
 func (rs GenResource) Routes() chi.Router {
@@ -32,15 +40,16 @@ func (rs GenResource) Routes() chi.Router {
 			}
 
 			images.ProcessImageParams(params)
+			images.InjectBadgeAssets(params)
 
 			svgStr := string(conf.SVG)
-			tmpl, err := template.New("svg").Option("missingkey=zero").Parse(svgStr)
+			tmpl, err := template.New("svg").Funcs(templateFuncs).Option("missingkey=zero").Parse(svgStr)
 			if err != nil {
 				w.WriteHeader(500)
 				w.Write([]byte("Unable to parse SVG: " + err.Error()))
 				return
 			}
-			
+
 			svgBuf := bytes.NewBuffer([]byte(""))
 			err = tmpl.Execute(svgBuf, params)
 			if err != nil {
