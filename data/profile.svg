@@ -106,7 +106,7 @@
 <path d="M85.5203 549.067H87.086V544.272H85.5203V549.067ZM83.8643 550.732V542.613H87.9366V543.42H88.742V549.919H87.9366V550.732H83.8643Z" fill="#1A1A1A"/>
 <path fill-rule="evenodd" clip-rule="evenodd" d="M55 525H93.4442V555H55V525ZM56.4982 526.498V553.502H91.9461V526.498H56.4982Z" fill="#1A1A1A"/>
 <rect width="147" height="40" transform="translate(97.4443 520)" fill="#1A1A1A"/>
-<text fill="white" xml:space="preserve" style="white-space: pre" font-family="FFF Forward" font-size="14" letter-spacing="0.06em"><tspan x="101.444" y="548.625">FOSSUNITED</tspan></text>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="FFF Forward" font-size="14" letter-spacing="0.06em" text-anchor="middle" dominant-baseline="central" x="170.9443" y="540">FOSSUNITED</text>
 </g>
 <path d="M262.444 520V560" stroke="#1A1A1A" stroke-width="2"/>
 <text fill="#1A1A1A" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="32" font-weight="600" letter-spacing="-0.02em"><tspan x="280.444" y="551.636">{{ .username }}</tspan></text>
