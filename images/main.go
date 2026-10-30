@@ -10,6 +10,7 @@ import (
 	"image/png"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -26,6 +27,15 @@ const (
 	fetchTimeout  = 5 * time.Second
 	maxImageBytes = 5 << 20 // 5MB
 )
+
+// httpClient never follows redirects, so a redirect can't be used to
+// bypass isSafeHost's check of the original URL.
+var httpClient = &http.Client{
+	Timeout: fetchTimeout,
+	CheckRedirect: func(*http.Request, []*http.Request) error {
+		return http.ErrUseLastResponse
+	},
+}
 
 var defaultAvatarDataURI string
 
@@ -75,36 +85,49 @@ func isInvalidPath(path string) bool {
 	return p == "" || strings.EqualFold(p, "none")
 }
 
-// resolveURL turns a param value into the fossunited.org URL to fetch. A
-// relative path is appended to baseURL (the historical behavior); an
-// absolute URL is used as-is only if it already points at fossunited.org,
-// so this never fetches an arbitrary caller-supplied host.
-func resolveURL(path string) (string, error) {
-	u, err := url.Parse(path)
-	if err == nil && u.IsAbs() {
-		if u.Scheme != "http" && u.Scheme != "https" || !strings.EqualFold(u.Hostname(), "fossunited.org") {
-			return "", fmt.Errorf("only fossunited.org URLs are allowed, got %q", path)
-		}
-		return path, nil
+// resolveURL turns a param value into the URL to fetch: an absolute URL
+// is used as-is, anything else is treated as a path relative to
+// fossunited.org (the historical behavior).
+func resolveURL(path string) string {
+	if u, err := url.Parse(path); err == nil && u.IsAbs() {
+		return path
 	}
-	return baseURL + "/" + strings.TrimPrefix(path, "/"), nil
+	return baseURL + "/" + strings.TrimPrefix(path, "/")
 }
 
-// FetchAndEncode downloads an image from fossunited.org at the given path
-// (or a full fossunited.org URL), converts it to PNG, and returns a
-// base64 data URI.
+// isSafeHost blocks loopback/private/link-local/unspecified addresses so
+// this can't be used to probe the server's own internal network (SSRF).
+func isSafeHost(host string) bool {
+	if h, _, err := net.SplitHostPort(host); err == nil {
+		host = h
+	}
+	ips, err := net.LookupIP(host)
+	if err != nil || len(ips) == 0 {
+		return false
+	}
+	for _, ip := range ips {
+		if ip.IsLoopback() || ip.IsPrivate() || ip.IsLinkLocalUnicast() || ip.IsUnspecified() {
+			return false
+		}
+	}
+	return true
+}
+
+// FetchAndEncode downloads an image -- either from an absolute URL, or
+// from the given path on fossunited.org -- converts it to PNG, and
+// returns a base64 data URI.
 func FetchAndEncode(path string) (string, error) {
 	if isInvalidPath(path) {
 		return DefaultAvatar(), nil
 	}
 
-	target, err := resolveURL(path)
-	if err != nil {
-		return "", err
+	target := resolveURL(path)
+	req, err := http.NewRequest(http.MethodGet, target, nil)
+	if err != nil || !isSafeHost(req.URL.Host) {
+		return "", fmt.Errorf("fetch %s: not allowed", target)
 	}
 
-	client := &http.Client{Timeout: fetchTimeout}
-	resp, err := client.Get(target)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("fetch %s: %w", target, err)
 	}
